@@ -195,6 +195,7 @@ class EntityManager extends EntityManagerBase implements EntityManagerInterface 
     //               bundle of the entity being exported is of the configured
     //               type.
     $syncs = $this->configManager->getSyncs([
+      'status' => TRUE,
       'local_entity' => [
         'type_id' => $entity->getEntityTypeId(),
       ],
