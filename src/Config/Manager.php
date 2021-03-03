@@ -48,6 +48,7 @@ class Manager implements ManagerInterface {
   public function getSyncs(array $filters = []) {
     $filters = NestedArray::mergeDeep(
       [
+        'status' => NULL,
         'local_entity' => ['type_id' => NULL],
         'operation' => [
           'id' => NULL,
@@ -71,6 +72,22 @@ class Manager implements ManagerInterface {
         return $carry;
       },
       []
+    );
+
+    // Filter out any synchronization that do not match the status, if given.
+    $syncs = array_filter(
+      $syncs,
+      function ($sync) use ($filters) {
+        if ($filters['status'] === NULL) {
+          return TRUE;
+        }
+
+        if ($sync->get('status') !== $filters['status']) {
+          return FALSE;
+        }
+
+        return TRUE;
+      }
     );
 
     // Filter out any synchronization that do not match the entity type ID

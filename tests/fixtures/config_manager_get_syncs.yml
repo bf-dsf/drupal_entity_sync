@@ -1,28 +1,64 @@
 # Same entity type but different operation definitions.
-user__operation_enabled:
-  id: user__operation_enabled
+user__enabled__operation_enabled:
+  id: user__enabled__operation_enabled
+  status: TRUE
   local_entity:
     type_id: user
   operations:
     import_list:
       status: TRUE
 
-user__operation_disabled:
-  id: user__operation_disabled
+user__disabled__operation_enabled:
+  id: user__disabled__operation_enabled
+  status: FALSE
+  local_entity:
+    type_id: user
+  operations:
+    import_list:
+      status: TRUE
+
+user__undefined__operation_enabled:
+  id: user__undefined__operation_enabled
+  local_entity:
+    type_id: user
+  operations:
+    import_list:
+      status: TRUE
+
+user__enabled__operation_disabled:
+  id: user__enabled__operation_disabled
+  status: TRUE
   local_entity:
     type_id: user
   operations:
     import_list:
       status: FALSE
 
-user__operation_undefined:
-  id: user__operation_undefined
+user__disabled__operation_disabled:
+  id: user__disabled__operation_disabled
+  status: FALSE
+  local_entity:
+    type_id: user
+  operations:
+    import_list:
+      status: FALSE
+
+user__enabled__operation_undefined:
+  id: user__enabled__operation_undefined
+  status: TRUE
+  local_entity:
+    type_id: user
+
+user__disabled__operation_undefined:
+  id: user__disabled__operation_undefined
+  status: FALSE
   local_entity:
     type_id: user
 
 # Different entity type so that we can test filtering by entity type ID.
 node__operation_enabled:
   id: node__operation_enabled
+  status: TRUE
   local_entity:
     type_id: node
   operations:

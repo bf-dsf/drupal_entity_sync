@@ -39,27 +39,56 @@ class SyncManagerTest extends UnitTestCase {
       [
         [],
         [
-          'user__operation_enabled',
-          'user__operation_disabled',
-          'user__operation_undefined',
+          'user__enabled__operation_enabled',
+          'user__disabled__operation_enabled',
+          'user__undefined__operation_enabled',
+          'user__enabled__operation_disabled',
+          'user__disabled__operation_disabled',
+          'user__enabled__operation_undefined',
+          'user__disabled__operation_undefined',
           'node__operation_enabled',
+        ],
+      ],
+      // Filter by sync status only.
+      [
+        ['status' => TRUE],
+        [
+          'user__enabled__operation_enabled',
+          'user__enabled__operation_disabled',
+          'user__enabled__operation_undefined',
+          'node__operation_enabled',
+        ],
+      ],
+      [
+        ['status' => FALSE],
+        [
+          'user__disabled__operation_enabled',
+          'user__disabled__operation_disabled',
+          'user__disabled__operation_undefined',
         ],
       ],
       // Filter by entity type ID only.
       [
         ['local_entity' => ['type_id' => 'user']],
         [
-          'user__operation_enabled',
-          'user__operation_disabled',
-          'user__operation_undefined',
+          'user__enabled__operation_enabled',
+          'user__disabled__operation_enabled',
+          'user__undefined__operation_enabled',
+          'user__enabled__operation_disabled',
+          'user__disabled__operation_disabled',
+          'user__enabled__operation_undefined',
+          'user__disabled__operation_undefined',
         ],
       ],
       // Filter by operation ID only.
       [
         ['operation' => ['id' => 'import_list']],
         [
-          'user__operation_enabled',
-          'user__operation_disabled',
+          'user__enabled__operation_enabled',
+          'user__disabled__operation_enabled',
+          'user__undefined__operation_enabled',
+          'user__enabled__operation_disabled',
+          'user__disabled__operation_disabled',
           'node__operation_enabled',
         ],
       ],
@@ -72,7 +101,9 @@ class SyncManagerTest extends UnitTestCase {
           ],
         ],
         [
-          'user__operation_enabled',
+          'user__enabled__operation_enabled',
+          'user__disabled__operation_enabled',
+          'user__undefined__operation_enabled',
           'node__operation_enabled',
         ],
       ],
@@ -84,7 +115,8 @@ class SyncManagerTest extends UnitTestCase {
           ],
         ],
         [
-          'user__operation_disabled',
+          'user__enabled__operation_disabled',
+          'user__disabled__operation_disabled',
         ],
       ],
       // Filter by entity type ID, operation ID and status.
@@ -97,7 +129,36 @@ class SyncManagerTest extends UnitTestCase {
           ],
         ],
         [
-          'user__operation_enabled',
+          'user__enabled__operation_enabled',
+          'user__disabled__operation_enabled',
+          'user__undefined__operation_enabled',
+        ],
+      ],
+      // Filter by sync status, entity type ID, operation ID and status.
+      [
+        [
+          'status' => TRUE,
+          'local_entity' => ['type_id' => 'user'],
+          'operation' => [
+            'id' => 'import_list',
+            'status' => TRUE,
+          ],
+        ],
+        [
+          'user__enabled__operation_enabled',
+        ],
+      ],
+      [
+        [
+          'status' => FALSE,
+          'local_entity' => ['type_id' => 'user'],
+          'operation' => [
+            'id' => 'import_list',
+            'status' => TRUE,
+          ],
+        ],
+        [
+          'user__disabled__operation_enabled',
         ],
       ],
     ];
@@ -114,9 +175,13 @@ class SyncManagerTest extends UnitTestCase {
     array $expected_sync_ids
   ) {
     $sync_ids = [
-      'user__operation_enabled',
-      'user__operation_disabled',
-      'user__operation_undefined',
+      'user__enabled__operation_enabled',
+      'user__disabled__operation_enabled',
+      'user__undefined__operation_enabled',
+      'user__enabled__operation_disabled',
+      'user__disabled__operation_disabled',
+      'user__enabled__operation_undefined',
+      'user__disabled__operation_undefined',
       'node__operation_enabled',
     ];
     $mock_syncs = $this->prophesizeSyncs($sync_ids);
