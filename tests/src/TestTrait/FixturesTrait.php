@@ -224,6 +224,9 @@ trait FixturesTrait {
       return $data[$case_id];
     }
 
+    $fixture_id = $this->getFixtureId($fixture_id);
+    $fixtures_directory = $this->getFixturesDirectory($fixtures_directory);
+    $filename = realpath($fixtures_directory . '/' . $fixture_id . '.yml');
     throw new \RuntimeException(
       sprintf(
         'Fixture case with ID "%s" not found in the data for fixture "%s", file "%s"',
