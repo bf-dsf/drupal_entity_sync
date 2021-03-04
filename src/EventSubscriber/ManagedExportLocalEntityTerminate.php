@@ -77,14 +77,31 @@ class ManagedExportLocalEntityTerminate implements EventSubscriberInterface {
       return;
     }
 
+    $sync = $event->getSync();
     $local_entity = $event->getContext()['local_entity'];
-    $this->fieldManager->setRemoteChangedField(
-      $data['response'],
-      $local_entity,
-      $event->getSync()
-    );
+    $local_entity_changed = FALSE;
 
-    if ($data['action'] === EntityManagerInterface::ACTION_CREATE) {
+    // We only set the remote changed field if it is defined in the
+    // synchronization configuration. There are cases where it is not, such as
+    // when we send the entity to a remote resource when created or updated but
+    // we do not track an association.
+    if ($sync->get('remote_resource.changed_field')) {
+      $this->fieldManager->setRemoteChangedField(
+        $data['response'],
+        $local_entity,
+        $event->getSync()
+      );
+      $local_entity_changed = TRUE;
+    }
+
+    // Similarly, we only set the remote ID field if it is defined in the
+    // synchronization configuration. If it is, by default we only set it if we
+    // are creating a new remote ID; when are updating an existing one we should
+    // already have the association correctly stored in the field, in the most
+    // common import/export flows. Custom flows might have to create custom
+    // subscribers to define the desired behavior.
+    $is_create = $data['action'] === EntityManagerInterface::ACTION_CREATE;
+    if ($is_create && $sync->get('remote_resource.id_field')) {
       $this->fieldManager->setRemoteIdField(
         $data['response'],
         $local_entity,
@@ -92,6 +109,11 @@ class ManagedExportLocalEntityTerminate implements EventSubscriberInterface {
         // Only if it does not already have a value.
         FALSE
       );
+      $local_entity_changed = TRUE;
+    }
+
+    if (!$local_entity_changed) {
+      return;
     }
 
     $local_entity->save();
