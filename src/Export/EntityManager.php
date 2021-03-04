@@ -158,18 +158,40 @@ class EntityManager extends EntityManagerBase implements EntityManagerInterface 
 
     $context = $options['context'] ?? [];
 
-    // Export the entity.
-    $data = $this->createOrUpdate($local_entity, $sync);
-
-    // Terminate the operation.
-    // Add to the context the local entity that was exported.
-    $this->terminate(
-      Events::LOCAL_ENTITY_TERMINATE,
+    // Notify subscribers that the operation is about to be initiated.
+    // @I Write tests for operation cancellations
+    //    type     : task
+    //    priority : high
+    //    labels   : export, testing
+    $cancel = $this->preInitiate(
+      Events::LOCAL_ENTITY_PRE_INITIATE,
       'export_entity',
       $context + ['local_entity' => $local_entity],
-      $sync,
-      $data ?? []
+      $sync
     );
+    if ($cancel) {
+      return;
+    }
+
+    // Run the operation.
+    // We do this in a `try/finally` structure so that we can still dispatch the
+    // post-terminate event. Subscribers may still need to run whether the
+    // operation was successfull or not. For example, even if a managed
+    // operation failed we unlock it so that the next one is allowed to run.
+    // At the end, the error/exception is still thrown so that the caller can
+    // handle it as required.
+    try {
+      $this->doExportLocalEntity($sync, $local_entity, $options, $context);
+    }
+    finally {
+      // Notify subscribers that the operation has terminated.
+      $this->postTerminate(
+        Events::LOCAL_ENTITY_POST_TERMINATE,
+        'export_entity',
+        $context,
+        $sync
+      );
+    }
   }
 
   /**
@@ -349,6 +371,51 @@ class EntityManager extends EntityManagerBase implements EntityManagerInterface 
         'entity_id' => $entity->id(),
       ]);
     }
+  }
+
+  /**
+   * Runs the actual local entity export operation.
+   *
+   * @param \Drupal\Core\Config\ImmutableConfig $sync
+   *   The configuration object for synchronization that defines the operation
+   *   we are currently executing.
+   * @param \Drupal\Core\Entity\ContentEntityInterface $local_entity
+   *   The local entity.
+   * @param array $options
+   *   An associative array of options that determine various aspects of the
+   *   export. For supported options see
+   *   \Drupal\entity_sync\Export\EntityManagerInterface::exportLocalEntity().
+   * @param array $context
+   *   An associative array containing context related to the circumstances of
+   *   the operation. See
+   *   \Drupal\entity_sync\Export\ManagerInterface::exportLocalEntity().
+   */
+  protected function doExportLocalEntity(
+    ImmutableConfig $sync,
+    ContentEntityInterface $local_entity,
+    array $options,
+    array $context
+  ) {
+    // Initiate the operation.
+    $this->initiate(
+      Events::LOCAL_ENTITY_INITIATE,
+      'export_entity',
+      $context,
+      $sync
+    );
+
+    // Export the entity.
+    $data = $this->createOrUpdate($local_entity, $sync);
+
+    // Terminate the operation.
+    // Add to the context the local entity that was exported.
+    $this->terminate(
+      Events::LOCAL_ENTITY_TERMINATE,
+      'export_entity',
+      $context + ['local_entity' => $local_entity],
+      $sync,
+      $data ?? []
+    );
   }
 
   /**
