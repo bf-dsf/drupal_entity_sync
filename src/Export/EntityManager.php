@@ -312,15 +312,26 @@ class EntityManager extends EntityManagerBase implements EntityManagerInterface 
       // custom data to `hook_entity_insert`.
       // See https://www.drupal.org/project/drupal/issues/3158180
       //
+      // Note that we may not always have a remote changed field; that can be,
+      // for example, when we only export an entity type while imports are
+      // disabled. We therefore skip the check if imports are disabled.
+      //
       // @I Test skipping exports that are triggered by imports
       //    type     : task
       //    priority : high
       //    labels   : export, testing
-      // @I Review the case of exports that do not have a remote changed field
+      // @I Review case of imports+exports without a remote changed field
       //    type     : bug
       //    priority : high
       //    labels   : export
-      if ($is_managed && $is_update) {
+      $import_status = FALSE;
+      if ($sync->get('operations.import_list.status')) {
+        $import_status = TRUE;
+      }
+      elseif ($sync->get('operations.import_entity.status')) {
+        $import_status = TRUE;
+      }
+      if ($import_status && $is_managed && $is_update) {
         $field_name = $sync->get('local_entity.remote_changed_field');
 
         $original_changed = $context['original_entity']
@@ -338,6 +349,8 @@ class EntityManager extends EntityManagerBase implements EntityManagerInterface 
       // always be empty.
       // See entity_sync_entity_bundle_field_info_alter().
       //
+      // As above, we skip the checks if imports are disabled.
+      //
       // @I Allow queueing exports of imported entities for different syncs
       //    type     : bug
       //    priority : high
@@ -345,7 +358,7 @@ class EntityManager extends EntityManagerBase implements EntityManagerInterface 
       //    notes    : There are legitimate cases where we still want to allow
       //               exports of new imported entities e.g. import from one
       //               remote resource and send to another.
-      if ($is_managed && !$is_update) {
+      elseif ($import_status && $is_managed && !$is_update) {
         $remote_changed_name = $sync->get('local_entity.remote_changed_field');
         $remote_changed_field = $entity->get(
           $sync->get('local_entity.remote_changed_field')
