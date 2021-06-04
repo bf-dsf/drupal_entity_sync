@@ -41,7 +41,7 @@ class DefaultExportLocalEntityMapping implements EventSubscriberInterface {
     // Check if the field exists.
     $id_field_name = $sync->get('local_entity.remote_id_field');
     if (!$local_entity->hasField($id_field_name)) {
-      return [];
+      return;
     }
 
     // If we don't have a value it's a create, if we do it's an update.
