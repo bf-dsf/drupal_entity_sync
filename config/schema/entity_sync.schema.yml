@@ -281,6 +281,36 @@ entity_sync.operation.export_entity:
     queue:
       type: boolean
       label: 'Whether the export will be queued or executed on-the-fly'
+    # The behavior of the Database queue provided by Drupal Core and respected
+    # by other modules such as Ultimate Cron is to reschedule failed queue items
+    # instead of deleting them. If the reason for failure is permanent e.g. a
+    # remote entity being updated does not exist anymore, the queue item will
+    # get stuck in the queue being regularly rescheduled. That is not only
+    # wasteful but it can cause thousands of queue items stuck interfering with
+    # the processing of legitimate queue items. While we keep the expected
+    # behavior by default, we provide additional error handling modes to
+    # prevent such issues.
+    #
+    # Supported values:
+    # - throw: No action taken i.e. errors will be thrown and the queue will
+    #   do its default handling. For the Database queue provided by Drupal Core
+    #   that is to reschedule the item. This is the default error handling
+    #   mode when not defined.
+    # - log_and_skip: Errors are caught and withheld from being thrown,
+    #   causing the queue item to be considered as successfully processed and
+    #   deleted from the queue. Error messages are logged.
+    # - log_and_throw: Errors are thrown and their messages are logged.
+    # - skip: Errors are caught and withheld from being thrown, causing the
+    #   queue item to be considered as successfully processed and deleted from
+    #   the queue. Error messages are not logged.
+    #
+    # @I Move error handling mode setting under `queue`
+    #    type     : task
+    #    priority : normal
+    #    labels   : config, export, queue, error-handling
+    queue_error_handling:
+      type: string
+      label: 'The error handling mode that should be employed on queued exports when errors are thrown'
     # @I Document the `export_entity` state manager behavior
     #    type     : task
     #    priority : normal
