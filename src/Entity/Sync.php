@@ -18,6 +18,12 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     plural = "@count entity synchronizations",
  *   ),
  *   config_prefix = "sync",
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "uuid",
+ *     "config"
+ *   },
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label",
