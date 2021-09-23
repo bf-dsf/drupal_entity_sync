@@ -21,8 +21,11 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *   config_export = {
  *     "id",
  *     "label",
- *     "uuid",
- *     "config"
+ *     "description",
+ *     "local_entity",
+ *     "remote_resource",
+ *     "operations",
+ *     "field_mapping"
  *   },
  *   entity_keys = {
  *     "id" = "id",
