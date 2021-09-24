@@ -16,6 +16,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 
+use Exception;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -166,7 +167,7 @@ class Manager extends EntityManagerBase implements ManagerInterface {
     // Run the operation.
     // We do this in a `try/finally` structure so that we can still dispatch the
     // post-terminate event. Subscribers may still need to run whether the
-    // operation was successfull or not. For example, even if a managed
+    // operation was successful or not. For example, even if a managed
     // operation failed we unlock it so that the next one is allowed to run.
     // At the end, the error/exception is still thrown so that the caller can
     // handle it as required.
@@ -176,6 +177,9 @@ class Manager extends EntityManagerBase implements ManagerInterface {
     //    labels   : event, import, testing
     try {
       $this->doImportRemoteList($sync, $filters, $options, $context);
+    }
+    catch (Exception $e) {
+      $this->logger->error('importRemoteList Exception:' . $e->getMessage() . ', Trace: ' . $e->getTraceAsString());
     }
     finally {
       // Notify subscribers that the operation has terminated.
@@ -461,6 +465,9 @@ class Manager extends EntityManagerBase implements ManagerInterface {
     // handle it as required.
     try {
       $this->doImportRemoteEntity($sync, $remote_entity, $options, $context);
+    }
+    catch (Exception $e) {
+      $this->logger->error('wrapDoImportRemoteEntity Exception:' . $e->getMessage() . ', Trace: ' . $e->getTraceAsString());
     }
     finally {
       // Notify subscribers that the operation has terminated.
