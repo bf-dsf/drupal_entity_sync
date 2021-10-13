@@ -33,10 +33,6 @@ interface ManagerInterface {
    * @return \Drupal\Core\Config\ImmutableConfig[]
    *   An array containing the synchronization configurations.
    *
-   * @I Support filtering synchronizations per entity bundle
-   *    type     : improvement
-   *    priority : high
-   *    labels   : config
    */
   public function getSyncs(array $filters = []);
 

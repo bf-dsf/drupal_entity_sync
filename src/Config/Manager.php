@@ -74,10 +74,22 @@ class Manager implements ManagerInterface {
       []
     );
 
+    // Filter out any synchronization that do not match bundle
+    $syncs = array_filter(
+      $syncs,
+      static function ($sync) use ($filters) {
+        if (isset($filters['local_entity']['bundle'])) {
+          $sync_bundle = $sync->get('local_entity.bundle');
+          return ($sync_bundle && $sync_bundle === $filters['local_entity']['bundle']);
+        }
+        return TRUE;
+      }
+    );
+
     // Filter out any synchronization that do not match the status, if given.
     $syncs = array_filter(
       $syncs,
-      function ($sync) use ($filters) {
+      static function ($sync) use ($filters) {
         if ($filters['status'] === NULL) {
           return TRUE;
         }
@@ -94,7 +106,7 @@ class Manager implements ManagerInterface {
     // filter, if given.
     $syncs = array_filter(
       $syncs,
-      function ($sync) use ($filters) {
+      static function ($sync) use ($filters) {
         if (!$filters['local_entity']['type_id']) {
           return TRUE;
         }
@@ -111,7 +123,7 @@ class Manager implements ManagerInterface {
     // status, if given.
     return array_filter(
       $syncs,
-      function ($sync) use ($filters) {
+      static function ($sync) use ($filters) {
         if (!$filters['operation']['id']) {
           return TRUE;
         }

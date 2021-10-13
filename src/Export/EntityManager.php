@@ -207,20 +207,19 @@ class EntityManager extends EntityManagerBase implements EntityManagerInterface 
     //    priority : normal
     //    labels   : export, performance
     //
-    // @I Support filtering by bundle
-    //    type     : bug
-    //    priority : high
-    //    labels   : config, export
-    //    notes    : The entity bundle is optional in the synchronization
-    //               configuration; however, if it is defined, it should be
-    //               interpreted as if the export should only proceed if the
-    //               bundle of the entity being exported is of the configured
-    //               type.
+    $entityTypeId = $entity->getEntityTypeId();
+    $entityBundle = $entity->bundle();
+    $localEntityParams = [
+      'type_id' => $entityTypeId,
+    ];
+
+    if ($entityBundle && $entityTypeId !== $entityBundle) {
+      $localEntityParams['bundle'] = $entityBundle;
+    }
+
     $syncs = $this->configManager->getSyncs([
       'status' => TRUE,
-      'local_entity' => [
-        'type_id' => $entity->getEntityTypeId(),
-      ],
+      'local_entity' => $localEntityParams,
       'operation' => [
         'id' => 'export_entity',
         'status' => TRUE,
